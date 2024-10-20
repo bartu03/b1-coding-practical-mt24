@@ -2,7 +2,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 import numpy as np
 import matplotlib.pyplot as plt
-from .terrain import generate_reference_and_limits
+import pandas as pd
+from uuv_mission.terrain import generate_reference_and_limits
 
 class Submarine:
     def __init__(self):
@@ -75,8 +76,12 @@ class Mission:
 
     @classmethod
     def from_csv(cls, file_name: str):
-        # You are required to implement this method
-        pass
+        data = pd.read_csv(file_name).to_numpy() #This bit is a modification on the codebase
+        reference = data['reference']
+        cave_height = data['cave_height']
+        cave_depth = data['cave_depth']
+        return cls(reference, cave_height, cave_depth)
+        
 
 
 class ClosedLoop:
@@ -97,8 +102,12 @@ class ClosedLoop:
         for t in range(T):
             positions[t] = self.plant.get_position()
             observation_t = self.plant.get_depth()
-            # Call your controller here
-            self.plant.transition(actions[t], disturbances[t])
+            # Call your controller here : following 3 lines are modifications
+            error = mission.reference[t] - observation_t
+            action_t = self.controller.controller_action(error)
+            actions[t] = action_t
+
+            self.plant.transition(action_t, disturbances[t])
 
         return Trajectory(positions)
         
