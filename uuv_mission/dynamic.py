@@ -76,7 +76,7 @@ class Mission:
 
     @classmethod
     def from_csv(cls, file_name: str):
-        data = pd.read_csv(file_name).to_numpy() #This bit is a modification on the codebase
+        data = pd.read_csv(file_name).to_numpy() # Read the csv file and convert it to numpy array
         reference = data[:,0]
         cave_height = data[:,1]
         cave_depth = data[:,2]
@@ -102,7 +102,7 @@ class ClosedLoop:
         for t in range(T):
             positions[t] = self.plant.get_position()
             observation_t = self.plant.get_depth()
-            # Call your controller here : following 3 lines are modifications
+            # Calculate the error and implement control action
             error = mission.reference[t] - observation_t
             action_t = self.controller.controller_action(error)
             actions[t] = action_t
